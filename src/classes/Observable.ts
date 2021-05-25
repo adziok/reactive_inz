@@ -1,11 +1,30 @@
-import { EventEmitter } from './EventEmitter';
+import {EventEmitter} from './EventEmitter';
+import {Subscribable} from "../interfaces/Subscribable";
 // import { ObservableWithPipes } from './ObservableWithPipe';
 // import { Subscribable } from './types/Subscribable';
 // import { Unsubscribable } from './types/Unsubscribable';
 // import { Observer } from './Observer';
 // import { PipelineOperator } from './types/PipelinesOperators';
 
-export class Observable<T> implements Subscribable<T> {
+interface ObserverConstructorParams<T> {
+    next: (value: T) => void;
+    eventEmitter: EventEmitter<"next" | "error" | "complete" | "subscribe">;
+    error: (error: any) => void;
+    complete: () => void;
+}
+
+interface Unsubscribable {
+    unsubscribe(): void;
+}
+
+class Observer<T> implements Unsubscribable {
+    constructor(param: ObserverConstructorParams<T>) {}
+
+    unsubscribe(): void {
+    }
+}
+
+export class Observable<T> implements Subscribable {
     private subscribed = false;
     private eventEmitter = new EventEmitter<'next' | 'error' | 'complete' | 'subscribe'>();
     private pending = false;
@@ -18,12 +37,12 @@ export class Observable<T> implements Subscribable<T> {
     }
 
     public subscribe(next?: (value: T) => void, error?: (error: any) => void, complete?: () => void): Unsubscribable {
-        return new Observer({ next, error, complete, eventEmitter: this.eventEmitter });
+        return new Observer({next, error, complete, eventEmitter: this.eventEmitter});
     }
 
-    public pipe(...pipelines: PipelineOperator<T>[]): Subscribable<T> {
-        return new ObservableWithPipes(this.eventEmitter, pipelines);
-    }
+    // public pipe(...pipelines: PipelineOperator<T>[]): Subscribable<T> {
+    //     return new ObservableWithPipes(this.eventEmitter, pipelines);
+    // }
 
     /**
      * Call when Observer start subscribing data source
