@@ -1,27 +1,25 @@
-import {EventEmitter} from './EventEmitter';
-import {Subscribable} from "../interfaces/Subscribable";
+import { EventEmitter } from './EventEmitter';
+import { Subscribable } from '../interfaces/Subscribable';
+import { Unsubscribable } from '../interfaces/Unsubscribable';
+import { Observer } from './Observer';
 // import { ObservableWithPipes } from './ObservableWithPipe';
 // import { Subscribable } from './types/Subscribable';
 // import { Unsubscribable } from './types/Unsubscribable';
 // import { Observer } from './Observer';
 // import { PipelineOperator } from './types/PipelinesOperators';
 
-interface ObserverConstructorParams<T> {
-    next: (value: T) => void;
-    eventEmitter: EventEmitter<"next" | "error" | "complete" | "subscribe">;
-    error: (error: any) => void;
-    complete: () => void;
+interface PipeFunction<A = any, R = any> {
+    execute(arg: A): R;
 }
 
-interface Unsubscribable {
-    unsubscribe(): void;
-}
+class PipeExecutor {
+    private pipeFunctions: PipeFunction[] = [];
 
-class Observer<T> implements Unsubscribable {
-    constructor(param: ObserverConstructorParams<T>) {}
-
-    unsubscribe(): void {
+    add(pipeFunctions: PipeFunction[]) {
+        this.pipeFunctions = [...this.pipeFunctions, ...pipeFunctions];
     }
+
+    execute();
 }
 
 export class Observable<T> implements Subscribable {
@@ -29,6 +27,7 @@ export class Observable<T> implements Subscribable {
     private eventEmitter = new EventEmitter<'next' | 'error' | 'complete' | 'subscribe'>();
     private pending = false;
     private _source: T[];
+    private pipeExecutor: PipeExecutor;
 
     constructor(...args: T[]) {
         this._source = [...args];
@@ -37,7 +36,7 @@ export class Observable<T> implements Subscribable {
     }
 
     public subscribe(next?: (value: T) => void, error?: (error: any) => void, complete?: () => void): Unsubscribable {
-        return new Observer({next, error, complete, eventEmitter: this.eventEmitter});
+        return new Observer({ next, error, complete, eventEmitter: this.eventEmitter });
     }
 
     // public pipe(...pipelines: PipelineOperator<T>[]): Subscribable<T> {
@@ -59,7 +58,7 @@ export class Observable<T> implements Subscribable {
     }
 
     private emitNextEvent(nextEvent: T | Error) {
-        this.eventEmitter.emit(nextEvent instanceof Error && 'error' || 'next', nextEvent);
+        this.eventEmitter.emit((nextEvent instanceof Error && 'error') || 'next', nextEvent);
 
         if (!this.pending && this._source.length === 0) {
             this.eventEmitter.emit('complete');
