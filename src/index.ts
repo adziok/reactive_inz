@@ -1,1 +1,1 @@
-console.log('Hello WSB')
+console.log('Hello WSB');
