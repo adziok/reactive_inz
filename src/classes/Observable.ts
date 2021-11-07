@@ -58,9 +58,13 @@ export class Observable<T> implements Subscribable {
     }
 
     private async emitNextEvent(nextEvent: T | Error) {
-        const value = await this.pipeExecutor.execute(nextEvent);
+        try {
+            const value = await this.pipeExecutor.execute(nextEvent);
 
-        this.eventEmitter.emit((value instanceof Error && 'error') || 'next', value);
+            this.eventEmitter.emit((value instanceof Error && 'error') || 'next', value);
+        } catch (error) {
+            this.eventEmitter.emit('error', error);
+        }
 
         if (!this.pending && this._source.length === 0) {
             this.eventEmitter.emit('complete');
