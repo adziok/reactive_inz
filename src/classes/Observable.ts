@@ -49,12 +49,6 @@ export class Observable<T> implements Subscribable {
         return this;
     }
 
-    /**
-     * Call when Observer start subscribing data source
-     *
-     * @private
-     * @memberof Observable
-     */
     private async handleSubscribeEvent() {
         this.subscribed = true;
 
@@ -63,8 +57,9 @@ export class Observable<T> implements Subscribable {
         }
     }
 
-    private emitNextEvent(nextEvent: T | Error) {
-        const value = this.pipeExecutor.execute(nextEvent);
+    private async emitNextEvent(nextEvent: T | Error) {
+        const value = await this.pipeExecutor.execute(nextEvent);
+
         this.eventEmitter.emit((value instanceof Error && 'error') || 'next', value);
 
         if (!this.pending && this._source.length === 0) {

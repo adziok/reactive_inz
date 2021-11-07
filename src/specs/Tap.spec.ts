@@ -1,17 +1,19 @@
 import { Observable } from '../classes/Observable';
 import { tap } from '../classes/Tap';
+import { sleep } from './utils';
 
 describe('Tap operator', () => {
-    it('Have access to stream values', () => {
+    it('Have access to stream values', async () => {
         const observable = new Observable('test_value');
         const spy = jest.fn();
 
         observable.pipe(tap((v) => console.log(v))).subscribe(spy);
 
+        await sleep(100);
         expect(spy).toBeCalledWith('test_value');
     });
 
-    it('Should not mutate stream values', () => {
+    it('Should not mutate stream values', async () => {
         const observable = new Observable('test_value');
         const spy = jest.fn();
 
@@ -24,9 +26,7 @@ describe('Tap operator', () => {
             )
             .subscribe(spy);
 
+        await sleep(100);
         expect(spy).toBeCalledWith('test_value');
     });
 });
-// "@typescript-eslint/eslint-plugin": "^4.19.0",
-//     "@typescript-eslint/parser": "^4.19.0",
-//     "eslint": "^7.22.0",

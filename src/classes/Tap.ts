@@ -1,10 +1,11 @@
 import { PipeFunction } from './Observable';
-import { AnyFunction } from './utils';
+import { AnyFunction, deepClone } from './utils';
 
 export const tap = (cb: AnyFunction): PipeFunction => {
     return {
         execute(arg: any): any {
-            cb(arg);
+            const argClone = deepClone(arg);
+            cb(argClone);
             return arg;
         },
     };
