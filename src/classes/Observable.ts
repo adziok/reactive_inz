@@ -2,13 +2,9 @@ import { EventEmitter } from './EventEmitter';
 import { Subscribable } from '../interfaces/Subscribable';
 import { Unsubscribable } from '../interfaces/Unsubscribable';
 import { Observer } from './Observer';
-// import { ObservableWithPipes } from './ObservableWithPipe';
-// import { Subscribable } from './types/Subscribable';
-// import { Unsubscribable } from './types/Unsubscribable';
-// import { Observer } from './Observer';
-// import { PipelineOperator } from './types/PipelinesOperators';
+import { curryPipes } from './utils';
 
-interface PipeFunction<A = any, R = any> {
+export interface PipeFunction<A = any, R = any> {
     execute(arg: A): R;
 }
 
@@ -19,7 +15,16 @@ class PipeExecutor {
         this.pipeFunctions = [...this.pipeFunctions, ...pipeFunctions];
     }
 
-    execute();
+    execute(value: any) {
+        if (!this.isIncludeAnyPipe()) {
+            return value;
+        }
+        return curryPipes(...this.pipeFunctions)(value);
+    }
+
+    private isIncludeAnyPipe() {
+        return this.pipeFunctions.length > 0;
+    }
 }
 
 export class Observable<T> implements Subscribable {
@@ -27,7 +32,7 @@ export class Observable<T> implements Subscribable {
     private eventEmitter = new EventEmitter<'next' | 'error' | 'complete' | 'subscribe'>();
     private pending = false;
     private _source: T[];
-    private pipeExecutor: PipeExecutor;
+    private pipeExecutor = new PipeExecutor();
 
     constructor(...args: T[]) {
         this._source = [...args];
@@ -39,9 +44,10 @@ export class Observable<T> implements Subscribable {
         return new Observer({ next, error, complete, eventEmitter: this.eventEmitter });
     }
 
-    // public pipe(...pipelines: PipelineOperator<T>[]): Subscribable<T> {
-    //     return new ObservableWithPipes(this.eventEmitter, pipelines);
-    // }
+    public pipe(...pipelines: PipeFunction[]): Observable<T> {
+        this.pipeExecutor.add(pipelines);
+        return this;
+    }
 
     /**
      * Call when Observer start subscribing data source
@@ -49,16 +55,17 @@ export class Observable<T> implements Subscribable {
      * @private
      * @memberof Observable
      */
-    private handleSubscribeEvent() {
+    private async handleSubscribeEvent() {
         this.subscribed = true;
 
         while (this._source.length > 0) {
-            this.emitNextEvent(this._source.shift());
+            await this.emitNextEvent(this._source.shift());
         }
     }
 
     private emitNextEvent(nextEvent: T | Error) {
-        this.eventEmitter.emit((nextEvent instanceof Error && 'error') || 'next', nextEvent);
+        const value = this.pipeExecutor.execute(nextEvent);
+        this.eventEmitter.emit((value instanceof Error && 'error') || 'next', value);
 
         if (!this.pending && this._source.length === 0) {
             this.eventEmitter.emit('complete');

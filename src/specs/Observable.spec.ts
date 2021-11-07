@@ -11,7 +11,7 @@ describe('Observable', () => {
             expect(observer.unsubscribe).toBeDefined();
         });
 
-        it('# should emit values declared in constructor on first subscription attempt', () => {
+        it.only('# should emit values declared in constructor on first subscription attempt', () => {
             const observable = new Observable('test_value');
             const spy = jest.fn();
 
