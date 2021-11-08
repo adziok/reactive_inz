@@ -1,4 +1,3 @@
-import { PipeFunction } from '../Observable';
 import { cloneDeep } from 'lodash';
 
 export const asyncForEach = async (elements: any[], callback: (el: any, i?: number, arr?: any[]) => void) => {
@@ -7,16 +6,7 @@ export const asyncForEach = async (elements: any[], callback: (el: any, i?: numb
     }
 };
 
-export type AnyFunction = (...args: any[]) => any | Promise<any>;
-
-export const curryPipes =
-    (...steps: PipeFunction[]) =>
-    async (initValue: any) => {
-        let currentValue = await initValue;
-        await asyncForEach(steps, async (step: PipeFunction) => {
-            currentValue = await step.execute(currentValue);
-        });
-        return currentValue;
-    };
+export type FunctionReturning<T> = (...args: any[]) => T | Promise<T>;
+export type AnyFunction = FunctionReturning<any>;
 
 export const deepClone = (obj: any) => cloneDeep(obj);

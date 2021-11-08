@@ -6,11 +6,13 @@ describe('Tap operator', () => {
     it('Have access to stream values', async () => {
         const observable = new Observable('test_value');
         const spy = jest.fn();
+        const inTapCallbackSpy = jest.fn();
 
-        observable.pipe(tap((v) => console.log(v))).subscribe(spy);
+        observable.pipe(tap((v) => inTapCallbackSpy(v))).subscribe(spy);
 
         await sleep(100);
         expect(spy).toBeCalledWith('test_value');
+        expect(inTapCallbackSpy).toBeCalledWith('test_value');
     });
 
     it('Errors thrown from  tap scope should be ignored', async () => {

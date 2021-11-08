@@ -1,21 +1,24 @@
-import { curryPipes } from '../classes/common/utils';
-import { PipeFunction } from '../classes/Observable';
+import { curryPipes, PipeFunction } from '../classes/PipeExecutor';
+import { ok, OkResult, PipeFunctionResult } from '../classes/PipeFunctionResult';
 
 describe('Utils', () => {
     describe('CurryPipes', () => {
         it('should return initial value when pipes parameter is not provided', async () => {
-            const result = await curryPipes()(4);
-            expect(result).toEqual(4);
+            const result = await curryPipes()(ok(4));
+            expect((result as OkResult<any, any>).value).toEqual(4);
         });
 
         it('should return mutated value when pipe mutable pipe is provided', async () => {
             const add2pipe: PipeFunction = {
-                execute(value: any): any {
-                    return value + 2;
+                execute(result: PipeFunctionResult<any, any>): PipeFunctionResult<any, any> {
+                    if (result.isOk()) {
+                        return ok(result.value + 2);
+                    }
+                    return result;
                 },
             };
-            const result = await curryPipes(add2pipe)(4);
-            expect(result).toEqual(6);
+            const result = await curryPipes(add2pipe)(ok(4));
+            expect((result as OkResult<any, any>).value).toEqual(6);
         });
     });
 });

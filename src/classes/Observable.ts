@@ -2,30 +2,8 @@ import { EventEmitter } from './common/EventEmitter';
 import { Subscribable } from '../interfaces/Subscribable';
 import { Unsubscribable } from '../interfaces/Unsubscribable';
 import { Observer } from './Observer';
-import { curryPipes } from './common/utils';
-
-export interface PipeFunction<A = any, R = any> {
-    execute(arg: A): R;
-}
-
-class PipeExecutor {
-    private pipeFunctions: PipeFunction[] = [];
-
-    add(pipeFunctions: PipeFunction[]) {
-        this.pipeFunctions = [...this.pipeFunctions, ...pipeFunctions];
-    }
-
-    execute(value: any) {
-        if (!this.isIncludeAnyPipe()) {
-            return value;
-        }
-        return curryPipes(...this.pipeFunctions)(value);
-    }
-
-    private isIncludeAnyPipe() {
-        return this.pipeFunctions.length > 0;
-    }
-}
+import { PipeExecutor, PipeFunction } from './PipeExecutor';
+import { PipeFunctionResult, PipeFunctionResultFactory } from './PipeFunctionResult';
 
 export class Observable<T> implements Subscribable {
     private subscribed = false;
@@ -53,15 +31,24 @@ export class Observable<T> implements Subscribable {
         this.subscribed = true;
 
         while (this._source.length > 0) {
-            await this.emitNextEvent(this._source.shift());
+            const wrappedEventIntoResult = PipeFunctionResultFactory.create(this._source.shift());
+            await this.emitNextEvent(wrappedEventIntoResult);
         }
     }
 
-    private async emitNextEvent(nextEvent: T | Error) {
+    private async emitNextEvent(nextWrappedEvent: PipeFunctionResult<T, Error>) {
         try {
-            const value = await this.pipeExecutor.execute(nextEvent);
+            const result = await this.pipeExecutor.execute(nextWrappedEvent);
 
-            this.eventEmitter.emit((value instanceof Error && 'error') || 'next', value);
+            if (result.isSkip()) {
+                return;
+            }
+            if (result.isError()) {
+                this.eventEmitter.emit('error', result.error);
+            }
+            if (result.isOk()) {
+                this.eventEmitter.emit('next', result.value);
+            }
         } catch (error) {
             this.eventEmitter.emit('error', error);
         }
