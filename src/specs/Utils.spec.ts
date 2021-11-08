@@ -1,4 +1,4 @@
-import { curryPipes } from '../classes/utils';
+import { curryPipes } from '../classes/common/utils';
 import { PipeFunction } from '../classes/Observable';
 
 describe('Utils', () => {

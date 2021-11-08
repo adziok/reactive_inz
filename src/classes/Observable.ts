@@ -1,8 +1,8 @@
-import { EventEmitter } from './EventEmitter';
+import { EventEmitter } from './common/EventEmitter';
 import { Subscribable } from '../interfaces/Subscribable';
 import { Unsubscribable } from '../interfaces/Unsubscribable';
 import { Observer } from './Observer';
-import { curryPipes } from './utils';
+import { curryPipes } from './common/utils';
 
 export interface PipeFunction<A = any, R = any> {
     execute(arg: A): R;

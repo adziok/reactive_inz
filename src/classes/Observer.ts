@@ -1,4 +1,4 @@
-import { EventEmitter } from './EventEmitter';
+import { EventEmitter } from './common/EventEmitter';
 import { Unsubscribable } from '../interfaces/Unsubscribable';
 
 interface ObserverConstructorParams<T> {

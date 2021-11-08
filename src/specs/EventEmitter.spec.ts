@@ -1,4 +1,4 @@
-import { EventEmitter } from '../classes/EventEmitter';
+import { EventEmitter } from '../classes/common/EventEmitter';
 
 describe('EventEmitter', () => {
     let eventEmitter: EventEmitter<any>;

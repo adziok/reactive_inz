@@ -1,5 +1,5 @@
 import { PipeFunction } from '../Observable';
-import { AnyFunction, deepClone } from '../utils';
+import { AnyFunction, deepClone } from '../common/utils';
 
 export const tap = <T = any>(cb: AnyFunction): PipeFunction => {
     return {

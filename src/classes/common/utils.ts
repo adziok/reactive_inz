@@ -1,4 +1,4 @@
-import { PipeFunction } from './Observable';
+import { PipeFunction } from '../Observable';
 import { cloneDeep } from 'lodash';
 
 export const asyncForEach = async (elements: any[], callback: (el: any, i?: number, arr?: any[]) => void) => {
