@@ -1,6 +1,6 @@
 import { Observable } from '../classes/Observable';
 import { sleep } from './utils';
-import { map } from '../classes/Map';
+import { map } from '../classes/operators';
 
 describe('Map operator', () => {
     it('Have access to stream values', async () => {
