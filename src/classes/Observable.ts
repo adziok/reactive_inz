@@ -49,6 +49,11 @@ export class Observable<T> implements Subscribable {
             if (result.isOk()) {
                 this.eventEmitter.emit('next', result.value);
             }
+            if (result.shouldClose()) {
+                this.pending = false;
+                this._source.length = 0;
+                this.eventEmitter.emit('complete');
+            }
         } catch (error) {
             this.eventEmitter.emit('error', error);
         }

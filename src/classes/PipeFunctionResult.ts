@@ -1,4 +1,4 @@
-export type PipeFunctionResult<T, E> = OkResult<T, E> | ErrorResult<any, any> | SkipResult<any, any>;
+export type PipeFunctionResult<T, E> = OkResult<T, E> | ErrorResult<T, E> | SkipResult<T, E>;
 
 export interface Result<T, E> {
     shouldEmitError(): boolean;
@@ -8,75 +8,61 @@ export interface Result<T, E> {
     isError(): boolean;
 }
 
-export class OkResult<T, E> implements Result<T, E> {
-    public constructor(public readonly value: T) {}
+export function BaseResult<T, E>(
+    shouldEmitError: boolean,
+    shouldEmit: boolean,
+    isSkip: boolean,
+    isOk: boolean,
+    isError: boolean
+) {
+    class BaseResultType {
+        private _shouldClose: boolean;
 
-    public shouldEmitError(): this is OkResult<T, E> {
-        return false;
+        public andClose() {
+            this._shouldClose = true;
+            return this;
+        }
+
+        public shouldClose() {
+            return this._shouldClose;
+        }
+
+        public shouldEmitError(): this is OkResult<T, E> {
+            return shouldEmitError;
+        }
+
+        public shouldEmit(): this is OkResult<T, E> {
+            return shouldEmit;
+        }
+
+        public isSkip(): this is OkResult<T, E> {
+            return isSkip;
+        }
+
+        public isOk(): this is OkResult<T, E> {
+            return isOk;
+        }
+
+        public isError(): this is ErrorResult<T, E> {
+            return isError;
+        }
     }
+    return BaseResultType;
+}
 
-    public shouldEmit(): this is OkResult<T, E> {
-        return true;
-    }
-
-    public isSkip(): this is OkResult<T, E> {
-        return false;
-    }
-
-    public isOk(): this is OkResult<T, E> {
-        return true;
-    }
-
-    public isError(): this is ErrorResult<T, E> {
-        return false;
+export class OkResult<T, E> extends BaseResult(false, true, false, true, false) {
+    constructor(public value: T) {
+        super();
     }
 }
 
-export class ErrorResult<T, E> implements Result<T, E> {
-    public constructor(public readonly error: E) {}
-
-    public shouldEmitError(): this is OkResult<T, E> {
-        return true;
-    }
-
-    public shouldEmit(): this is OkResult<T, E> {
-        return false;
-    }
-
-    public isSkip(): this is OkResult<T, E> {
-        return false;
-    }
-
-    public isOk(): this is OkResult<T, E> {
-        return false;
-    }
-
-    public isError(): this is ErrorResult<T, E> {
-        return true;
+export class ErrorResult<T, E> extends BaseResult(true, false, false, false, true) {
+    constructor(public error: E) {
+        super();
     }
 }
 
-export class SkipResult<T, E> implements Result<T, E> {
-    public shouldEmitError(): this is OkResult<T, E> {
-        return false;
-    }
-
-    public shouldEmit(): this is OkResult<T, E> {
-        return false;
-    }
-
-    public isSkip(): this is OkResult<T, E> {
-        return true;
-    }
-
-    public isOk(): this is OkResult<T, E> {
-        return false;
-    }
-
-    public isError(): this is ErrorResult<T, E> {
-        return false;
-    }
-}
+export class SkipResult<T, E> extends BaseResult(false, false, true, false, false) {}
 
 export const skip = <T, E>(): SkipResult<T, E> => new SkipResult();
 
