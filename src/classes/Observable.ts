@@ -6,9 +6,9 @@ import { PipeExecutor, PipeFunction } from './PipeExecutor';
 import { PipeFunctionResult, PipeFunctionResultFactory } from './PipeFunctionResult';
 
 export class Observable<T> implements Subscribable {
-    private subscribed = false;
+    protected subscribed = false;
     private eventEmitter = new EventEmitter<'next' | 'error' | 'complete' | 'subscribe'>();
-    private pending = false;
+    protected pending = false;
     private _source: T[];
     private pipeExecutor = new PipeExecutor();
 
@@ -36,7 +36,7 @@ export class Observable<T> implements Subscribable {
         }
     }
 
-    private async emitNextEvent(nextWrappedEvent: PipeFunctionResult<T, Error>) {
+    protected async emitNextEvent(nextWrappedEvent: PipeFunctionResult<T, Error>) {
         try {
             const result = await this.pipeExecutor.execute(nextWrappedEvent);
 
@@ -94,17 +94,6 @@ export class Observable<T> implements Subscribable {
     // private pushEvent() {
     //     return (val: T) => {
     //         this.eventEmitter.emit('next', val);
-    //     };
-    // }
-
-    // static create<T>(dataSource: T[]) {
-    //     const observable = new Observable<T>(...dataSource);
-    //     observable.pending = true;
-
-    //     return {
-    //         next: observable.pushEvent(),
-    //         close: observable.close(),
-    //         observable
     //     };
     // }
 }
