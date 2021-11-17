@@ -1,9 +1,8 @@
 import { Observable } from './Observable';
-import { EventEmitter } from './common/EventEmitter';
 import { PipeFunctionResultFactory } from './PipeFunctionResult';
 
 class SubjectObservable<T> extends Observable<T> {
-    static create<T>(eventEmitter: EventEmitter<any>, initValues: T[] = []) {
+    static create<T>(initValues: T[] = []) {
         const instance = new SubjectObservable<T>(...initValues);
         instance.pending = true;
         return instance;
@@ -23,10 +22,8 @@ export class Subject<T> {
         this._source = [...args];
     }
 
-    private eventEmitter = new EventEmitter();
-
     toObservable(): Observable<T> {
-        const observable = SubjectObservable.create<T>(this.eventEmitter, this._source);
+        const observable = SubjectObservable.create<T>(this._source);
         this._observables.push(observable);
         return observable;
     }
