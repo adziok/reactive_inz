@@ -62,38 +62,4 @@ export class Observable<T> implements Subscribable {
             this.eventEmitter.emit('complete');
         }
     }
-
-    // /**
-    //  * @internal
-    //  *
-    //  * Internal method to close Observable fromSubject
-    //  * Method emit complete event and remove EventEmiiter listners
-    //  *
-    //  * @private
-    //  * @returns
-    //  * @memberof Observable
-    //  */
-    // private close() {
-    //     return () => {
-    //         this.pending = false;
-    //         this.eventEmitter.emit('complete');
-    //         this.eventEmitter.removeAllListeners();
-    //     };
-    // }
-
-    // /**
-    //  * @internal
-    //  *
-    //  * Internal method to commuinicate Subject with subscribe and allow to emit new data for observers
-    //  * If subscribed is false pushing data to array of events
-    //  * Else emit data by EventEmmiter
-    //  *
-    //  * @private
-    //  * @memberof Observable
-    //  */
-    // private pushEvent() {
-    //     return (val: T) => {
-    //         this.eventEmitter.emit('next', val);
-    //     };
-    // }
 }
